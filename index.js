@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
     const db = client.db("artify_db");
     const artWorkCollection = db.collection("artworks");
+    const userCollection = db.collection("users");
 
     app.get("/all-artworks", async (req, res) => {
       const cursor = artWorkCollection.find();
@@ -47,8 +48,6 @@ async function run() {
       const result = await artWorkCollection.insertOne(newArtwork);
       res.status(201).send(result);
     });
-
-    app.use("/", router);
 
     app.put("/favorite/:artworkId", async (req, res) => {
       const { artworkId } = req.params;
