@@ -48,6 +48,57 @@ async function run() {
       res.status(201).send(result);
     });
 
+    app.use("/", router);
+
+    app.put("/favorite/:artworkId", async (req, res) => {
+      const { artworkId } = req.params;
+      const { userEmail } = req.body;
+
+      try {
+        const result = await userCollection.updateOne(
+          { email: userEmail },
+          { $addToSet: { favorites: new ObjectId(artworkId) } },
+          { upsert: true }
+        );
+        res.send({ success: true, message: "Added to favorites", result });
+      } catch (err) {
+        res.status(500).send({ success: false, message: err.message });
+      }
+    });
+
+    app.put("/unfavorite/:artworkId", async (req, res) => {
+      const { artworkId } = req.params;
+      const { userEmail } = req.body;
+
+      try {
+        const result = await userCollection.updateOne(
+          { email: userEmail },
+          { $pull: { favorites: new ObjectId(artworkId) } }
+        );
+        res.send({ success: true, message: "Removed from favorites", result });
+      } catch (err) {
+        res.status(500).send({ success: false, message: err.message });
+      }
+    });
+
+
+    app.get("/user-favorites/:email", async (req, res) => {
+      const email = req.params.email;
+
+      try {
+        const user = await userCollection.findOne({ email });
+        if (!user || !user.favorites?.length) return res.send([]);
+
+        const favorites = await artWorkCollection
+          .find({ _id: { $in: user.favorites } })
+          .toArray();
+
+        res.send(favorites);
+      } catch (err) {
+        res.status(500).send({ message: err.message });
+      }
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
