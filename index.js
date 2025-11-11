@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 8000;
 
 // Middlewares
@@ -28,6 +28,19 @@ async function run() {
     await client.connect();
     const db = client.db("artify_db");
     const artWorkCollection = db.collection("artworks");
+
+    app.get("/all-artworks", async (req, res) => {
+      const cursor = artWorkCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/artworks-details/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await artWorkCollection.findOne(query);
+      res.send(result);
+    });
 
     app.post("/artworks", async (req, res) => {
       const newArtwork = req.body;
