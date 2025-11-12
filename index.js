@@ -44,6 +44,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/home-artworks", async (req, res) => {
+      const cursor = artWorkCollection.find().limit(6).sort({ _id: -1 });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/artworks-details/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
