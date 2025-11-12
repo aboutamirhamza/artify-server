@@ -1,15 +1,23 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 8000;
+const admin = require("firebase-admin");
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.otzdp54.mongodb.net/?appName=Cluster0`;
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
-const uri =
-  "mongodb+srv://artifyDB:vzy2dGw6Pr1Vgn0W@cluster0.otzdp54.mongodb.net/?appName=Cluster0";
+const decoded = Buffer.from(process.env.FIREBASE_SERVICE_KEY, "base64").toString("utf8");
+const serviceAccount = JSON.parse(decoded);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -114,25 +122,25 @@ async function run() {
     });
 
     app.patch("/artworks/:id", async (req, res) => {
-  const id = req.params.id;
-  const updated = req.body;
-  delete updated._id; // 🔥 remove _id before updating
+      const id = req.params.id;
+      const updated = req.body;
+      delete updated._id;
 
-  try {
-    const result = await artWorkCollection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updated }
-    );
+      try {
+        const result = await artWorkCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updated }
+        );
 
-    if (result.modifiedCount > 0) {
-      res.send({ success: true, message: "Artwork updated", result });
-    } else {
-      res.send({ success: false, message: "No changes made" });
-    }
-  } catch (err) {
-    res.status(500).send({ success: false, message: err.message });
-  }
-});
+        if (result.modifiedCount > 0) {
+          res.send({ success: true, message: "Artwork updated", result });
+        } else {
+          res.send({ success: false, message: "No changes made" });
+        }
+      } catch (err) {
+        res.status(500).send({ success: false, message: err.message });
+      }
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
