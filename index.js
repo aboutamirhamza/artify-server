@@ -80,7 +80,6 @@ async function run() {
       }
     });
 
-
     app.get("/user-favorites/:email", async (req, res) => {
       const email = req.params.email;
 
@@ -97,6 +96,43 @@ async function run() {
         res.status(500).send({ message: err.message });
       }
     });
+
+    app.get("/my-artworks/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await artWorkCollection
+        .find({ userEmail: email })
+        .toArray();
+      res.send(result);
+    });
+
+    app.delete("/artworks/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await artWorkCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(result);
+    });
+
+    app.patch("/artworks/:id", async (req, res) => {
+  const id = req.params.id;
+  const updated = req.body;
+  delete updated._id; // 🔥 remove _id before updating
+
+  try {
+    const result = await artWorkCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updated }
+    );
+
+    if (result.modifiedCount > 0) {
+      res.send({ success: true, message: "Artwork updated", result });
+    } else {
+      res.send({ success: false, message: "No changes made" });
+    }
+  } catch (err) {
+    res.status(500).send({ success: false, message: err.message });
+  }
+});
 
     await client.db("admin").command({ ping: 1 });
     console.log(
