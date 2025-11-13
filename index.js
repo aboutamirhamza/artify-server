@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const db = client.db("artify_db");
     const artWorkCollection = db.collection("artworks");
     const userCollection = db.collection("users");
