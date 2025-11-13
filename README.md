@@ -29,4 +29,5 @@
 Github Client Side Repositories Link: https://github.com/aboutamirhamza/artify-client <br>
 Github Server Side Repositories Link: https://github.com/aboutamirhamza/artify-server <br>
 
-Live Link: https://artify-30349.web.app/
+Live Link: https://artify-30349.web.app/ <br>
+Server Link: https://artify-server-nu.vercel.app/
